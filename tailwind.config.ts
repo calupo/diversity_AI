@@ -81,6 +81,10 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
+        bvg: {
+          yellow: "#F0D722",
+          black: "#000000",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

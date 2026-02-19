@@ -1,38 +1,28 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import { db } from "./db";
+import { translations, type InsertTranslation, type Translation } from "@shared/schema";
+import { desc } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createTranslation(translation: InsertTranslation): Promise<Translation>;
+  getHistory(): Promise<Translation[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
+export class DatabaseStorage implements IStorage {
+  async createTranslation(insertTranslation: InsertTranslation): Promise<Translation> {
+    const [translation] = await db
+      .insert(translations)
+      .values(insertTranslation)
+      .returning();
+    return translation;
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async getHistory(): Promise<Translation[]> {
+    return await db
+      .select()
+      .from(translations)
+      .orderBy(desc(translations.createdAt))
+      .limit(10); // Limit to last 10 for the prototype
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
