@@ -86,11 +86,11 @@ export default function Home() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-black/5">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center font-black text-xl border-2 border-black">
-              B
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-xl border-2 border-black">
+              💛
             </div>
             <div>
-              <h1 className="text-lg leading-none font-bold text-black">BVG Lingo</h1>
+              <h1 className="text-lg leading-none font-bold text-black">Lingo</h1>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Driver Assistant</p>
             </div>
           </div>
