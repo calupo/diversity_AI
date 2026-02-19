@@ -39,6 +39,10 @@ export async function registerRoutes(
     try {
       const { audio, autoPlay } = api.translations.process.input.parse(req.body);
       const audioBuffer = Buffer.from(audio, "base64");
+
+      if (!audioBuffer.length) {
+        return res.status(400).json({ message: "No audio data received" });
+      }
       
       // 1. Ensure format compatibility and transcribe
       const { buffer: compatibleBuffer, format } = await ensureCompatibleFormat(audioBuffer);
@@ -111,7 +115,8 @@ export async function registerRoutes(
 
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: "Translation failed" });
+      const message = err instanceof Error ? err.message : "Translation failed";
+      res.status(500).json({ message });
     }
   });
 
