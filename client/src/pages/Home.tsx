@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { useVoiceRecorder } from "@/replit_integrations/audio/useVoiceRecorder";
 import { useTranslate } from "@/hooks/use-translations";
 import { TranslationCard } from "@/components/TranslationCard";
@@ -28,6 +28,42 @@ export default function Home() {
   } | null>(null);
   
   const [autoPlay, setAutoPlay] = useState(true);
+  const autoPlayAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const playAudioSequentially = async (audioClips: Array<string | undefined>) => {
+    const clips = audioClips.filter((clip): clip is string => Boolean(clip));
+    if (!clips.length) return;
+
+    const audio = autoPlayAudioRef.current ?? new Audio();
+    autoPlayAudioRef.current = audio;
+
+    for (const clip of clips) {
+      await new Promise<void>((resolve) => {
+        audio.src = `data:audio/mp3;base64,${clip}`;
+        audio.currentTime = 0;
+
+        const cleanup = () => {
+          audio.onended = null;
+          audio.onerror = null;
+        };
+
+        audio.onended = () => {
+          cleanup();
+          resolve();
+        };
+
+        audio.onerror = () => {
+          cleanup();
+          resolve();
+        };
+
+        audio.play().catch(() => {
+          cleanup();
+          resolve();
+        });
+      });
+    }
+  };
 
   const playAudioSequentially = async (audioClips: Array<string | undefined>) => {
     for (const clip of audioClips) {
