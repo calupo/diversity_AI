@@ -39,6 +39,10 @@ export async function registerRoutes(
     try {
       const { audio, autoPlay } = api.translations.process.input.parse(req.body);
       const audioBuffer = Buffer.from(audio, "base64");
+
+      if (!audioBuffer.length) {
+        return res.status(400).json({ message: "No audio data received" });
+      }
       
       // 1. Ensure format compatibility and transcribe
       const { buffer: compatibleBuffer, format } = await ensureCompatibleFormat(audioBuffer);
@@ -87,8 +91,8 @@ export async function registerRoutes(
       // Let's generate them.
       
       const [berlinAudio, englishAudio] = await Promise.all([
-        textToSpeech(result.berlin, "onyx"), // Rougher voice for Berlin
-        textToSpeech(result.english, "fable") // British-ish voice? OpenAI voices are limited.
+        textToSpeech(result.berlin, "onyx", "mp3"), // Rougher voice for Berlin
+        textToSpeech(result.english, "fable", "mp3") // British-ish voice? OpenAI voices are limited.
       ]);
       
       berlinAudioBase64 = berlinAudio.toString("base64");
@@ -111,7 +115,8 @@ export async function registerRoutes(
 
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: "Translation failed" });
+      const message = err instanceof Error ? err.message : "Translation failed";
+      res.status(500).json({ message });
     }
   });
 

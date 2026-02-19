@@ -12,10 +12,25 @@ export function useVoiceRecorder() {
   const chunksRef = useRef<Blob[]>([]);
 
   const startRecording = useCallback(async (): Promise<void> => {
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      throw new Error("Audio recording is not supported in this browser.");
+    }
+
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream, {
-      mimeType: "audio/webm;codecs=opus",
-    });
+    const preferredMimeTypes = [
+      "audio/webm;codecs=opus",
+      "audio/webm",
+      "audio/mp4",
+      "audio/ogg;codecs=opus",
+    ];
+
+    const supportedMimeType = preferredMimeTypes.find((mimeType) =>
+      MediaRecorder.isTypeSupported(mimeType)
+    );
+
+    const recorder = supportedMimeType
+      ? new MediaRecorder(stream, { mimeType: supportedMimeType })
+      : new MediaRecorder(stream);
 
     mediaRecorderRef.current = recorder;
     chunksRef.current = [];
@@ -49,4 +64,3 @@ export function useVoiceRecorder() {
 
   return { state, startRecording, stopRecording };
 }
-
