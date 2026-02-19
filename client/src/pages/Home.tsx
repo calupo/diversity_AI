@@ -29,6 +29,19 @@ export default function Home() {
   
   const [autoPlay, setAutoPlay] = useState(true);
 
+  const playAudioSequentially = async (audioClips: Array<string | undefined>) => {
+    for (const clip of audioClips) {
+      if (!clip) continue;
+
+      await new Promise<void>((resolve) => {
+        const audio = new Audio(`data:audio/mp3;base64,${clip}`);
+        audio.onended = () => resolve();
+        audio.onerror = () => resolve();
+        audio.play().catch(() => resolve());
+      });
+    }
+  };
+
   const handleMicClick = async () => {
     if (recordingState === "idle" || recordingState === "stopped") {
       try {
@@ -62,10 +75,9 @@ export default function Home() {
           onSuccess: (data) => {
             setResult(data);
             
-            // Handle Auto-play if enabled
-            if (autoPlay && data.berlinAudio) {
-              const audio = new Audio(`data:audio/mp3;base64,${data.berlinAudio}`);
-              audio.play().catch(console.error);
+            // Handle Auto-play if enabled (German first, then English)
+            if (autoPlay) {
+              playAudioSequentially([data.berlinAudio, data.englishAudio]);
             }
           },
           onError: (error) => {
