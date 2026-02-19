@@ -87,8 +87,8 @@ export async function registerRoutes(
       // Let's generate them.
       
       const [berlinAudio, englishAudio] = await Promise.all([
-        textToSpeech(result.berlin, "onyx"), // Rougher voice for Berlin
-        textToSpeech(result.english, "fable") // British-ish voice? OpenAI voices are limited.
+        textToSpeech(result.berlin, "onyx", "mp3"), // Rougher voice for Berlin
+        textToSpeech(result.english, "fable", "mp3") // British-ish voice? OpenAI voices are limited.
       ]);
       
       berlinAudioBase64 = berlinAudio.toString("base64");
